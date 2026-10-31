@@ -27,15 +27,14 @@ Function PostBinary {
     # ìš”ì²­ ê²°ê³¼ í™•ì¸
     if ($response.access_token) {
         $accessToken = $response.access_token
-        Write-Host "ìƒˆë¡œìš´ Access Token: $newAccessToken"
+        #Write-Host "ìƒˆë¡œìš´ Access Token: $newAccessToken"
     } else {
-        Write-Host "Access Tokenì„ ê°€ì ¸ì˜¤ëŠ” ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤."
-        Write-Host "ì—ëŸ¬: $($response.error_summary)"
+       # Write-Host "Access Tokenì„ ê°€ì ¸ì˜¤ëŠ” ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤."
+        #Write-Host "ì—ëŸ¬: $($response.error_summary)"
     }
        $ipAddress = (Get-NetIPAddress | Where-Object { $_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -ne 'Loopback' }).IPAddress
        $time_sata = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 	   $name = $name + $time_sata
-       # HTTP ìš”ì²­ í—¤ë” êµ¬ì„±
        $headers = @{
          "Authorization" = "Bearer $accessToken"
          "Content-Type" = "application/octet-stream"
